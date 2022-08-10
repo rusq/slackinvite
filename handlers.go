@@ -1,6 +1,7 @@
 package slackinviter
 
 import (
+	"html/template"
 	"log"
 	"net/http"
 
@@ -14,7 +15,8 @@ type page struct {
 	Email         string
 	SubmitBtnText string
 	Error         string
-	CaptchaKey    string
+	CaptchaJS     template.HTML
+	CaptchaHTML   template.HTML
 }
 
 func (s *Server) handleRoot(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +44,8 @@ func (s *Server) hgetRoot(w http.ResponseWriter, r *http.Request) {
 		Name:          s.name,
 		Token:         csrf,
 		SubmitBtnText: "Gimme, gimme",
-		CaptchaKey:    s.rc.SiteKey,
+		CaptchaJS:     template.HTML(s.rc.JS()),
+		CaptchaHTML:   template.HTML(s.rc.HTML()),
 	}
 	if err := tmpl.ExecuteTemplate(w, "index.html", pg); err != nil {
 		log.Print(err)
@@ -72,7 +75,7 @@ func (s *Server) hpostRoot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := verifyRecaptcha(s.rc.SecretKey, recaptcha); err != nil {
+	if err := s.rc.Verify(recaptcha); err != nil {
 		log.Println(err)
 		http.Error(w, "invalid captcha", http.StatusExpectationFailed)
 		return

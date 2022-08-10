@@ -13,6 +13,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rusq/secure"
+	"github.com/rusq/slackinviter/internal/recaptcha"
 	"github.com/slack-go/slack"
 )
 
@@ -33,15 +34,10 @@ type Server struct {
 	secret [secretSz]byte
 	client *slack.Client
 	db     *sql.DB
-	rc     ReCaptcha
+	rc     recaptcha.ReCaptcha
 }
 
-type ReCaptcha struct {
-	SiteKey   string
-	SecretKey string
-}
-
-func New(addr string, db *sql.DB, client *slack.Client, rc ReCaptcha, title string) (*Server, error) {
+func New(addr string, db *sql.DB, client *slack.Client, rc recaptcha.ReCaptcha, title string) (*Server, error) {
 	var secret [secretSz]byte
 	if _, err := io.ReadFull(rand.Reader, secret[:]); err != nil {
 		return nil, err

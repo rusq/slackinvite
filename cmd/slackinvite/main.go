@@ -7,6 +7,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/rusq/slackinviter"
+	"github.com/rusq/slackinviter/internal/recaptcha"
 	"github.com/slack-go/slack"
 )
 
@@ -20,7 +21,7 @@ type params struct {
 	Token  string
 	Cookie string
 	Addr   string
-	RC     slackinviter.ReCaptcha
+	RC     recaptcha.ReCaptcha
 }
 
 var cli params

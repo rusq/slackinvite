@@ -1,4 +1,4 @@
-package slackinviter
+package recaptcha
 
 import (
 	"encoding/json"
@@ -7,6 +7,13 @@ import (
 	"net/url"
 )
 
+const htmlID = "html_element"
+
+type ReCaptcha struct {
+	SiteKey   string
+	SecretKey string
+}
+
 type gResponse struct {
 	Success     bool     `json:"success"`
 	ChallengeTs string   `json:"challenge_ts"`
@@ -14,9 +21,9 @@ type gResponse struct {
 	ErrorCodes  []string `json:"error-codes"`
 }
 
-func verifyRecaptcha(secret string, response string) error {
+func (rc ReCaptcha) Verify(response string) error {
 	values := url.Values{
-		"secret":   []string{secret},
+		"secret":   []string{rc.SecretKey},
 		"response": []string{response},
 	}
 
@@ -34,4 +41,18 @@ func verifyRecaptcha(secret string, response string) error {
 		return fmt.Errorf("recapcha at %s on %q is unsuccessful: %v", gr.ChallengeTs, gr.Hostname, gr.ErrorCodes)
 	}
 	return nil
+}
+
+func (rc ReCaptcha) JS() string {
+	return `<script type="text/javascript">
+	var onloadCallback = function() {
+		grecaptcha.render('` + htmlID + `', {
+			'sitekey' : '` + rc.SiteKey + `'
+			});
+			};
+			</script>`
+}
+
+func (rc ReCaptcha) HTML() string {
+	return `<div id="` + htmlID + `"></div>`
 }
