@@ -20,6 +20,7 @@ type params struct {
 	Token  string
 	Cookie string
 	Addr   string
+	RC     slackinviter.ReCaptcha
 }
 
 var cli params
@@ -28,6 +29,8 @@ func init() {
 	flag.StringVar(&cli.Token, "t", os.Getenv("TOKEN"), "slack `token`")
 	flag.StringVar(&cli.Cookie, "c", os.Getenv("COOKIE"), "slack `cookie`")
 	flag.StringVar(&cli.Addr, "l", addr, "listener `address`")
+	flag.StringVar(&cli.RC.SiteKey, "site-key", os.Getenv("RECAPTCHA_KEY"), "recaptcha `key`")
+	flag.StringVar(&cli.RC.SecretKey, "site-secret", os.Getenv("RECAPTCHA_SECRET"), "recaptcha `secret`")
 }
 
 func main() {
@@ -44,7 +47,7 @@ func main() {
 
 	client := slack.New(cli.Token, slack.OptionCookie("d", cli.Cookie))
 
-	si, err := slackinviter.New(cli.Addr, nil, client, "Slackdump")
+	si, err := slackinviter.New(cli.Addr, nil, client, cli.RC, "Slackdump")
 	if err != nil {
 		log.Fatal(err)
 	}
