@@ -2,9 +2,10 @@ package slackinviter
 
 import (
 	"html/template"
-	"log"
 	"net/http"
+	"net/mail"
 
+	"github.com/rusq/dlog"
 	"github.com/rusq/secure"
 )
 
@@ -15,6 +16,7 @@ type page struct {
 	Email         string
 	SubmitBtnText string
 	Error         string
+	FormID        string
 	CaptchaJS     template.HTML
 	CaptchaHTML   template.HTML
 }
@@ -31,9 +33,10 @@ func (s *Server) handleRoot(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) hgetRoot(w http.ResponseWriter, r *http.Request) {
+	const formID = "invite-form"
 	csrf, err := generateToken(s.secret)
 	if err != nil {
-		log.Print(err)
+		dlog.Print(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -44,11 +47,12 @@ func (s *Server) hgetRoot(w http.ResponseWriter, r *http.Request) {
 		Name:          s.name,
 		Token:         csrf,
 		SubmitBtnText: "Gimme, gimme",
-		CaptchaJS:     template.HTML(s.rc.JS()),
-		CaptchaHTML:   template.HTML(s.rc.HTML()),
+		FormID:        formID,
+		CaptchaJS:     template.HTML(s.rc.JSv3(formID)),
+		CaptchaHTML:   template.HTML(s.rc.HTMLv3("Gimme!", "btn", "btn-primary")),
 	}
 	if err := tmpl.ExecuteTemplate(w, "index.html", pg); err != nil {
-		log.Print(err)
+		dlog.Print(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -58,31 +62,44 @@ func (s *Server) hpostRoot(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	csrf := r.FormValue("token")
 	recaptcha := r.FormValue("g-recaptcha-response")
+	dlog.Debugf("%#v", r.Form)
 	if csrf == "" {
-		log.Print("empty token")
+		dlog.Print("empty token")
 		http.Error(w, "invalid token", http.StatusUnauthorized)
 		return
 	}
 
 	if err := verifyToken(csrf, s.secret, tokenTimeout); err != nil {
-		log.Print(err)
+		dlog.Print(err)
 		http.Error(w, "invalid token", http.StatusUnauthorized)
 		return
 	}
 
-	if email == "" {
+	if _, err := mail.ParseAddress(email); err != nil {
+		dlog.Print(err)
 		http.Error(w, "invalid email", http.StatusBadRequest)
 		return
 	}
 
-	if err := s.rc.Verify(recaptcha); err != nil {
-		log.Println(err)
+	resp, err := s.rc.Verify(recaptcha)
+	if err != nil {
+		dlog.Println(err)
 		http.Error(w, "invalid captcha", http.StatusExpectationFailed)
 		return
 	}
+	if resp.Score != "" {
+		score, err := resp.Score.Float64()
+		if err != nil {
+			dlog.Printf("failed to interpret score: %s", resp.Score)
+		} else if score < 0.5 {
+			dlog.Printf("low re-captcha score for %s: %s", email, resp.Score)
+			http.Error(w, "403 you are known for suspicious behaviour, please leave", http.StatusForbidden)
+			return
+		}
+	}
 
 	// if err := s.client.InviteToTeam(s.teamID, "Test", "Invite", email); err != nil {
-	// 	log.Printf("email: %s: %s", email, err)
+	// 	dlog.Printf("email: %s: %s", email, err)
 	// 	http.Error(w, "something went wrong", http.StatusInternalServerError)
 	// 	return
 	// }
@@ -101,7 +118,7 @@ func (s *Server) handleThankyou(w http.ResponseWriter, r *http.Request) {
 	}
 	email, err := secure.DecryptWithPassphrase(ct, s.secret[:])
 	if err != nil {
-		log.Print(err)
+		dlog.Print(err)
 		http.Redirect(w, r, "/", http.StatusMovedPermanently)
 		return
 	}
@@ -111,7 +128,7 @@ func (s *Server) handleThankyou(w http.ResponseWriter, r *http.Request) {
 		Email: email,
 	}
 	if err := tmpl.ExecuteTemplate(w, "thanks.html", pg); err != nil {
-		log.Println(err)
+		dlog.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}

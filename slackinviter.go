@@ -6,12 +6,12 @@ import (
 	"embed"
 	"html/template"
 	"io"
-	"log"
 	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/rusq/dlog"
 	"github.com/rusq/secure"
 	"github.com/rusq/slackinviter/internal/recaptcha"
 	"github.com/slack-go/slack"
@@ -60,9 +60,11 @@ func New(addr string, db *sql.DB, client *slack.Client, rc recaptcha.ReCaptcha, 
 }
 
 func (s *Server) Run() error {
-	secure.SetSignature("CSRF")
+	if err := initSecure("CSRF", 1024); err != nil {
+		return err
+	}
 
-	log.Printf("Running inviter for %s, with team_id=%q", s.name, s.teamID)
+	dlog.Printf("Running inviter for %s, with team_id=%q", s.name, s.teamID)
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
@@ -70,4 +72,16 @@ func (s *Server) Run() error {
 	r.Handle("/thankyou", http.HandlerFunc(s.handleThankyou))
 
 	return http.ListenAndServe(s.addr, r)
+}
+
+func initSecure(sig string, saltSz int) error {
+	secure.SetSignature(sig)
+
+	var salt = make([]byte, saltSz)
+	if _, err := io.ReadFull(rand.Reader, salt); err != nil {
+		return err
+	}
+	secure.SetSalt(salt)
+
+	return nil
 }

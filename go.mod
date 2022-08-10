@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/joho/godotenv v1.4.0
+	github.com/rusq/dlog v1.3.3
 	github.com/rusq/secure v0.0.4
 	github.com/slack-go/slack v0.11.2
 )

@@ -5,54 +5,103 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-)
+	"strings"
 
-const htmlID = "html_element"
+	"github.com/rusq/dlog"
+)
 
 type ReCaptcha struct {
 	SiteKey   string
 	SecretKey string
 }
 
-type gResponse struct {
-	Success     bool     `json:"success"`
-	ChallengeTs string   `json:"challenge_ts"`
-	Hostname    string   `json:"hostname"`
-	ErrorCodes  []string `json:"error-codes"`
+type Response struct {
+	Success     bool        `json:"success,omitempty"`
+	Score       json.Number `json:"score,omitempty"`
+	Action      string      `json:"action,omitempty"`
+	ChallengeTs string      `json:"challenge_ts,omitempty"`
+	Hostname    string      `json:"hostname,omitempty"`
+	ErrorCodes  []string    `json:"error-codes,omitempty"`
 }
 
-func (rc ReCaptcha) Verify(response string) error {
+const validationJS = `<script>(function () {
+	'use strict'
+  
+	window.addEventListener('load', function () {
+	  // Fetch all the forms we want to apply custom Bootstrap validation styles to
+	  var forms = document.getElementsByClassName('needs-validation')
+  
+	  // Loop over them and prevent submission
+	  Array.prototype.filter.call(forms, function (form) {
+		form.addEventListener('submit', function (event) {
+		  if (form.checkValidity() === false) {
+			event.preventDefault()
+			event.stopPropagation()
+		  }
+		  form.classList.add('was-validated')
+		}, false)
+	  })
+	}, false)
+  }())</script>`
+
+func (rc ReCaptcha) Verify(response string) (*Response, error) {
 	values := url.Values{
 		"secret":   []string{rc.SecretKey},
 		"response": []string{response},
 	}
 
-	resp, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify", values)
+	apiResp, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify", values)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	defer resp.Body.Close()
-	dec := json.NewDecoder(resp.Body)
-	var gr gResponse
-	if err := dec.Decode(&gr); err != nil {
-		return err
+	defer apiResp.Body.Close()
+	dec := json.NewDecoder(apiResp.Body)
+	var resp Response
+	if err := dec.Decode(&resp); err != nil {
+		return nil, err
 	}
-	if !gr.Success {
-		return fmt.Errorf("recapcha at %s on %q is unsuccessful: %v", gr.ChallengeTs, gr.Hostname, gr.ErrorCodes)
+	dlog.Printf("%#v", resp)
+	if !resp.Success {
+		return &resp, fmt.Errorf("recapcha at %s on %q is unsuccessful: %v", resp.ChallengeTs, resp.Hostname, resp.ErrorCodes)
 	}
-	return nil
+	return &resp, nil
 }
 
-func (rc ReCaptcha) JS() string {
+func (rc ReCaptcha) JS(htmlID string) string {
 	return `<script type="text/javascript">
 	var onloadCallback = function() {
 		grecaptcha.render('` + htmlID + `', {
 			'sitekey' : '` + rc.SiteKey + `'
 			});
-			};
-			</script>`
+		};
+		</script>
+		<script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
+	`
 }
 
-func (rc ReCaptcha) HTML() string {
+func (rc ReCaptcha) HTML(htmlID string) string {
 	return `<div id="` + htmlID + `"></div>`
+}
+
+// JSv3 returns the javascript code necessary for reCaptcha v3.  formID should
+// match the <form id="<value>">.
+func (rc ReCaptcha) JSv3(formID string) string {
+	return validationJS + `<script src="https://www.google.com/recaptcha/api.js"></script>
+	<script>
+	function onSubmit(token) {
+	  document.getElementById("` + formID + `").submit();
+	}
+  </script>`
+
+}
+
+// HTMLv3 returns the HTML code necessary for reCaptcha v3.  It should be
+// placed instead of the "Submit" button.  Drawbacks:  form validation should
+// be handled manually.
+func (rc ReCaptcha) HTMLv3(buttonText string, classes ...string) string {
+	return `<button class="g-recaptcha ` + strings.Join(classes, " ") + `" 
+	data-sitekey="` + rc.SiteKey + `" 
+	data-callback='onSubmit' 
+	data-action='submit'>` + buttonText + `</button>`
+
 }
