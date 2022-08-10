@@ -4,6 +4,11 @@
         <div class="col-md-2"></div>
         <div class="col">
             <h1>{{.Fields.SlackWorkspace}}</h1>
+            {{if .Error}}
+            <div class="alert alert-danger" role="alert">
+                {{.Error}}
+            </div>
+            {{end}}
             <p>Please enter your email to receive the invitaton to join {{.Fields.SlackWorkspace}} Slack:</p>
             <form id="{{.FormID}}" action="/" method="POST" class="needs-validation">
                 <div class="mb-3">
