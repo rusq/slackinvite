@@ -3,8 +3,8 @@
     <div class="row">
         <div class="col-md-2"></div>
         <div class="col">
-            <h1>{{.Name}}</h1>
-            <p>Please enter your email to receive the invitaton to join {{.Name}} Slack:</p>
+            <h1>{{.Fields.SlackWorkspace}}</h1>
+            <p>Please enter your email to receive the invitaton to join {{.Fields.SlackWorkspace}} Slack:</p>
             <form id="{{.FormID}}" action="/" method="POST" class="needs-validation">
                 <div class="mb-3">
                     <label for="exampleInputEmail1" class="form-label">Email address</label>
@@ -12,21 +12,21 @@
                     <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
                 </div>
                 <input type="hidden" name="token" value="{{.Token}}" required />
-                {{- /* {{.CaptchaHTML}} */ -}}
+                {{- /* {{.CaptchaHTML}} (for version 2) */ -}}
                 <div class="mb-3">
-                    <p>By clicking "Submit" you agree to follow the {{.Name}} Slack
+                    <p>By clicking "Submit" you agree to follow the {{.Fields.SlackWorkspace}} Slack
                         Community Guideines including the following Rules:</p>
                     <ol>
-                        <li>You will not scrape {{.Name}} workspace or use it for testing
+                        <li>You will not scrape {{.Fields.SlackWorkspace}} workspace or use it for testing
                             purposes (i.e. programmatically generate content);</li>
                         <li>You will not express abusive behaviour towards other
-                            members of {{.Name}}.</li>
+                            members of {{.Fields.SlackWorkspace}}.</li>
                     </ol>
                     <p>Failure to comply to these Rules and Guidelines will result in your
                         membership being revoked.</p>
                 </div>
-                {{.CaptchaHTML}}{{- /* 
-                <button type="submit" class="btn btn-primary">{{.SubmitBtnText}}</button>
+                {{.CaptchaHTML}}{{- /* for version 2.
+                <button type="submit" class="btn btn-primary">{{.Fields.SubmitButton}}</button>
                 */ -}}
             </form>
         </div>

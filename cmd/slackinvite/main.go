@@ -2,11 +2,12 @@ package main
 
 import (
 	"flag"
+	"log"
 	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/rusq/dlog"
-	"github.com/rusq/slackinviter"
+	si "github.com/rusq/slackinviter"
 	"github.com/rusq/slackinviter/internal/recaptcha"
 	"github.com/slack-go/slack"
 )
@@ -18,39 +19,44 @@ const (
 )
 
 type params struct {
-	Title  string
-	Token  string
-	Cookie string
-	Addr   string
-	RC     recaptcha.ReCaptcha
+	Token     string
+	Cookie    string
+	Addr      string
+	RC        recaptcha.ReCaptcha
+	FieldsCfg string
 }
 
-var cli params
+var cmdline params
 
 func init() {
-	flag.StringVar(&cli.Title, "title", os.Getenv("WORKSPACE_NAME"), "Slack workspace `name`")
-	flag.StringVar(&cli.Token, "t", os.Getenv("TOKEN"), "slack `token`")
-	flag.StringVar(&cli.Cookie, "c", os.Getenv("COOKIE"), "slack `cookie`")
-	flag.StringVar(&cli.Addr, "l", addr, "listener `address`")
-	flag.StringVar(&cli.RC.SiteKey, "site-key", os.Getenv("RECAPTCHA_KEY"), "recaptcha `key`")
-	flag.StringVar(&cli.RC.SecretKey, "site-secret", os.Getenv("RECAPTCHA_SECRET"), "recaptcha `secret`")
+	flag.StringVar(&cmdline.FieldsCfg, "cfg", os.Getenv("CONFIG_FILE"), "Config file with template values")
+	flag.StringVar(&cmdline.Token, "t", os.Getenv("TOKEN"), "slack `token`")
+	flag.StringVar(&cmdline.Cookie, "c", os.Getenv("COOKIE"), "slack `cookie`")
+	flag.StringVar(&cmdline.Addr, "l", addr, "listener `address`")
+	flag.StringVar(&cmdline.RC.SiteKey, "site-key", os.Getenv("RECAPTCHA_KEY"), "recaptcha `key`")
+	flag.StringVar(&cmdline.RC.SecretKey, "site-secret", os.Getenv("RECAPTCHA_SECRET"), "recaptcha `secret`")
 }
 
 func main() {
 	flag.Parse()
-	if cli.Token == "" || cli.Cookie == "" {
+	if cmdline.Token == "" || cmdline.Cookie == "" {
 		flag.Usage()
 		dlog.Fatal("token or cookie not present")
 	}
-	if cli.Addr == "" {
-		cli.Addr = addr
+	if cmdline.Addr == "" {
+		cmdline.Addr = addr
 	}
 
-	dlog.Printf("listening on %s", cli.Addr)
+	dlog.Printf("listening on %s", cmdline.Addr)
 
-	client := slack.New(cli.Token, slack.OptionCookie("d", cli.Cookie))
+	client := slack.New(cmdline.Token, slack.OptionCookie("d", cmdline.Cookie))
 
-	si, err := slackinviter.New(cli.Addr, nil, client, cli.RC, "Slackdump")
+	fields, err := si.LoadFields(cmdline.FieldsCfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	si, err := si.New(cmdline.Addr, nil, client, cmdline.RC, fields)
 	if err != nil {
 		dlog.Fatal(err)
 	}

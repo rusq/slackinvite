@@ -28,16 +28,16 @@ var fs embed.FS
 var tmpl = template.Must(template.ParseFS(fs, "templates/*.html"))
 
 type Server struct {
-	name   string // title to show on the page
 	addr   string
 	teamID string
 	secret [secretSz]byte
 	client *slack.Client
 	db     *sql.DB
 	rc     recaptcha.ReCaptcha
+	fld    Fields
 }
 
-func New(addr string, db *sql.DB, client *slack.Client, rc recaptcha.ReCaptcha, title string) (*Server, error) {
+func New(addr string, db *sql.DB, client *slack.Client, rc recaptcha.ReCaptcha, fields Fields) (*Server, error) {
 	var secret [secretSz]byte
 	if _, err := io.ReadFull(rand.Reader, secret[:]); err != nil {
 		return nil, err
@@ -48,13 +48,13 @@ func New(addr string, db *sql.DB, client *slack.Client, rc recaptcha.ReCaptcha, 
 	}
 
 	s := &Server{
-		name:   title,
 		client: client,
 		db:     db,
 		addr:   addr,
 		secret: secret,
 		teamID: ti.ID,
 		rc:     rc,
+		fld:    fields,
 	}
 	return s, nil
 }
@@ -64,7 +64,7 @@ func (s *Server) Run() error {
 		return err
 	}
 
-	dlog.Printf("Running inviter for %s, with team_id=%q", s.name, s.teamID)
+	dlog.Printf("Running inviter for %s, with team_id=%q", s.fld.SlackWorkspace, s.teamID)
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)

@@ -67,7 +67,9 @@ func (rc ReCaptcha) Verify(response string) (*Response, error) {
 	return &resp, nil
 }
 
-func (rc ReCaptcha) JS(htmlID string) string {
+// JSv2 returns the javascript code that should be placed in the HTML template.
+// Make sure that htmlID matches the htmlID passed to HTML().
+func (rc ReCaptcha) JSv2(htmlID string) string {
 	return `<script type="text/javascript">
 	var onloadCallback = function() {
 		grecaptcha.render('` + htmlID + `', {
@@ -79,7 +81,10 @@ func (rc ReCaptcha) JS(htmlID string) string {
 	`
 }
 
-func (rc ReCaptcha) HTML(htmlID string) string {
+// HTMLv2 returns the HTMLv2 code that should be placed inside the <form>, possibly
+// next to the "submit" button.  Make sure that htmlID matches the htmlID passed
+// to JS.
+func (rc ReCaptcha) HTMLv2(htmlID string) string {
 	return `<div id="` + htmlID + `"></div>`
 }
 
@@ -96,12 +101,13 @@ func (rc ReCaptcha) JSv3(formID string) string {
 }
 
 // HTMLv3 returns the HTML code necessary for reCaptcha v3.  It should be
-// placed instead of the "Submit" button.  Drawbacks:  form validation should
-// be handled manually.
+// placed instead of the "Submit" button, as it returns the code for it.
+// buttonText is the text of the button, add any additional classes you want
+// the button to have by providing classes.
+// Drawbacks:  form validation should be handled manually.
 func (rc ReCaptcha) HTMLv3(buttonText string, classes ...string) string {
 	return `<button class="g-recaptcha ` + strings.Join(classes, " ") + `" 
 	data-sitekey="` + rc.SiteKey + `" 
 	data-callback='onSubmit' 
 	data-action='submit'>` + buttonText + `</button>`
-
 }

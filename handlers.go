@@ -10,15 +10,14 @@ import (
 )
 
 type page struct {
-	Title         string
-	Name          string
-	Token         string
-	Email         string
-	SubmitBtnText string
-	Error         string
-	FormID        string
-	CaptchaJS     template.HTML
-	CaptchaHTML   template.HTML
+	Title       string
+	Token       string
+	Email       string
+	Error       string
+	FormID      string
+	CaptchaJS   template.HTML
+	CaptchaHTML template.HTML
+	Fields      Fields
 }
 
 func (s *Server) handleRoot(w http.ResponseWriter, r *http.Request) {
@@ -43,13 +42,12 @@ func (s *Server) hgetRoot(w http.ResponseWriter, r *http.Request) {
 	//https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching
 	w.Header().Add("Cache-Control", "no-store, no-cache, max-age=0, must-revalidate, proxy-revalidate")
 	pg := page{
-		Title:         "Join " + s.name + " Slack",
-		Name:          s.name,
-		Token:         csrf,
-		SubmitBtnText: "Gimme, gimme",
-		FormID:        formID,
-		CaptchaJS:     template.HTML(s.rc.JSv3(formID)),
-		CaptchaHTML:   template.HTML(s.rc.HTMLv3("Gimme!", "btn", "btn-primary")),
+		Title:       "Join " + s.fld.SlackWorkspace + " Slack",
+		Token:       csrf,
+		FormID:      formID,
+		CaptchaJS:   template.HTML(s.rc.JSv3(formID)),
+		CaptchaHTML: template.HTML(s.rc.HTMLv3(s.fld.SubmitButton, "btn", "btn-primary")),
+		Fields:      s.fld,
 	}
 	if err := tmpl.ExecuteTemplate(w, "index.html", pg); err != nil {
 		dlog.Print(err)
@@ -123,9 +121,9 @@ func (s *Server) handleThankyou(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	pg := page{
-		Title: "Great success!",
-		Name:  s.name,
-		Email: email,
+		Title:  "Great success!",
+		Email:  email,
+		Fields: s.fld,
 	}
 	if err := tmpl.ExecuteTemplate(w, "thanks.html", pg); err != nil {
 		dlog.Println(err)
