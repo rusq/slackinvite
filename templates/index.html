@@ -1,0 +1,33 @@
+{{template "header.html" . }}
+<div class="container">
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col">
+            <h1>{{.Name}}</h1>
+            <p>Please enter your email to receive the invitaton to join {{.Name}} Slack:</p>
+            <form action="/" method="POST" class="needs-validation">
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Email address</label>
+                    <input type="email" class="form-control" name="email" aria-describedby="emailHelp" required>
+                    <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+                </div>
+                <input type="hidden" name="token" value="{{.Token}}">
+                <div class="mb-3">
+                    <p>By clicking "Submit" you agree to follow the {{.Name}} Slack
+                        Community Guideines including the following Rules:</p>
+                    <ol>
+                        <li>You will not scrape {{.Name}} workspace or use it for testing
+                            purposes (i.e. programmatically generate content);</li>
+                        <li>You will not express abusive behaviour towards other
+                            members of {{.Name}}.</li>
+                    </ol>
+                    <p>Failure to comply to these Rules and Guidelines will result in your
+                        membership being revoked.</p>
+                </div>
+                <button type="submit" class="btn btn-primary">{{.SubmitBtnText}}</button>
+            </form>
+        </div>
+        <div class="col-md-2"></div>
+    </div>
+</div>
+{{template "footer.html" . }}
