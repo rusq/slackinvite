@@ -32,6 +32,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rusq/dlog v1.3.3 h1:Q9fZW1H/YEnlDg3Ph1k/BRSBfi/q5ezI+8Metws9tTI=
 github.com/rusq/dlog v1.3.3/go.mod h1:kjZAEvBu7m3+mnJQKoIeLul1YB3kJq/6lZBdDTZmpzA=
+github.com/rusq/osenv/v2 v2.0.1 h1:1LtNt8VNV/W86wb38Hyu5W3Rwqt/F1JNRGE+8GRu09o=
+github.com/rusq/osenv/v2 v2.0.1/go.mod h1:+wJBSisjNZpfoD961JzqjaM+PtaqSusO3b4oVJi7TFY=
 github.com/rusq/secure v0.0.4 h1:svpiZHfHnx89eEDCCFI9OXG1Y8hL9kUWUG6fJbrWUOI=
 github.com/rusq/secure v0.0.4/go.mod h1:F1QilMKreuFRjov0UY7DZSIXn77/8RqMVGu2zV0RtqY=
 github.com/rusq/slack v0.11.100 h1:KnqoXJCtZEHcl4FtpdfQ1QgMOYlm8TX8fG9BMurEwlY=

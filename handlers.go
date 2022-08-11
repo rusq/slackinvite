@@ -27,6 +27,7 @@ const (
 	errCodeEmail   errorCode = "SI002"
 	errCodeCaptcha errorCode = "SI003"
 	errCodeBot     errorCode = "SI004"
+	errCodeSlack   errorCode = "SI005"
 	errCodeServer  errorCode = "SI500"
 )
 
@@ -35,6 +36,7 @@ var errorText = map[errorCode]string{
 	errCodeEmail:   "Invalid email.  Make sure you're entering a correct email.",
 	errCodeCaptcha: "Invalid captcha. Make sure you're not a robot.",
 	errCodeBot:     "You are known for being a robot.  Please leave.",
+	errCodeSlack:   "Failed to send the invitation.",
 	errCodeServer:  "Server error occurred.",
 }
 
@@ -135,11 +137,11 @@ func (s *Server) hpostRoot(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// if err := s.client.InviteToTeam(s.teamID, "Test", "Invite", email); err != nil {
-	// 	dlog.Printf("email: %s: %s", email, err)
-	// 	http.Error(w, "something went wrong", http.StatusInternalServerError)
-	// 	return
-	// }
+	if err := s.client.InviteToTeam(s.teamID, "Test", "Invite", email); err != nil {
+		dlog.Printf("email: %s: %s", email, err)
+		errRedirect(w, r, errCodeSlack)
+		return
+	}
 	ct, err := secure.EncryptWithPassphrase(email, s.secret[:])
 	if err != nil {
 		panic(err)

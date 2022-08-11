@@ -7,6 +7,7 @@ require (
 	github.com/goccy/go-yaml v1.9.5
 	github.com/joho/godotenv v1.4.0
 	github.com/rusq/dlog v1.3.3
+	github.com/rusq/osenv/v2 v2.0.1
 	github.com/rusq/secure v0.0.4
 	github.com/slack-go/slack v0.11.2
 )
