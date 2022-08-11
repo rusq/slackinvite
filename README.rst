@@ -15,6 +15,8 @@ So I did the right thing and wrote the Slack Inviter that uses the
 client token/cookie pair using the fork of slack library that I
 created for the `Slackdump`_.
 
+Demo: `Slackdump Slack invitation`_
+
 The invitations that your guests receive are from the actual user (that means
 *YOU*), i.e. "Scumbag Steve has invited you to work with them in Slack".
 
@@ -114,3 +116,4 @@ Quick Start
 
 
 .. _slackdump: https://github.com/rusq/slackdump
+.. _Slackdump Slack invitation: https://slackdump.herokuapp.com/
