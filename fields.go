@@ -2,6 +2,7 @@ package slackinviter
 
 import (
 	"os"
+	"reflect"
 
 	"github.com/goccy/go-yaml"
 )
@@ -18,6 +19,32 @@ type Fields struct {
 	GithubLink   string `yaml:"github_link,omitempty"`
 }
 
+// resolveEnv resolves any environment variables specified in the config.  it
+// uses unholy method to iterate through struct fields and call os.ExpandEnv
+// for each of them.
+func (f *Fields) resolveEnv() {
+	v := reflect.ValueOf(f)
+	p := v.Elem()
+	if p.Kind() != reflect.Struct {
+		return
+	}
+
+	for i := 0; i < p.NumField(); i++ {
+		fld := p.Field(i)
+		// will only resove strings
+		if fld.Kind() != reflect.String {
+			continue
+		}
+
+		// don't want any trouble, Sir.
+		if !fld.CanSet() || !fld.IsValid() {
+			continue
+		}
+
+		fld.SetString(os.ExpandEnv(fld.String()))
+	}
+}
+
 func LoadFields(filename string) (Fields, error) {
 	var fld Fields
 	f, err := os.Open(filename)
@@ -29,5 +56,6 @@ func LoadFields(filename string) (Fields, error) {
 	if err := dec.Decode(&fld); err != nil {
 		return fld, err
 	}
+	fld.resolveEnv() // resolve any environment variables
 	return fld, nil
 }
