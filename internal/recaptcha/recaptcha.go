@@ -24,26 +24,6 @@ type Response struct {
 	ErrorCodes  []string    `json:"error-codes,omitempty"`
 }
 
-const validationJS = `<script>(function () {
-	'use strict'
-  
-	window.addEventListener('load', function () {
-	  // Fetch all the forms we want to apply custom Bootstrap validation styles to
-	  var forms = document.getElementsByClassName('needs-validation')
-  
-	  // Loop over them and prevent submission
-	  Array.prototype.filter.call(forms, function (form) {
-		form.addEventListener('submit', function (event) {
-		  if (form.checkValidity() === false) {
-			event.preventDefault()
-			event.stopPropagation()
-		  }
-		  form.classList.add('was-validated')
-		}, false)
-	  })
-	}, false)
-  }())</script>`
-
 func (rc ReCaptcha) Verify(response string) (*Response, error) {
 	values := url.Values{
 		"secret":   []string{rc.SecretKey},
@@ -91,7 +71,7 @@ func (rc ReCaptcha) HTMLv2(htmlID string) string {
 // JSv3 returns the javascript code necessary for reCaptcha v3.  formID should
 // match the <form id="<value>">.
 func (rc ReCaptcha) JSv3(formID string) string {
-	return validationJS + `<script src="https://www.google.com/recaptcha/api.js"></script>
+	return `<script src="https://www.google.com/recaptcha/api.js"></script>
 	<script>
 	function onSubmit(token) {
 	  document.getElementById("` + formID + `").submit();
