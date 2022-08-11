@@ -35,8 +35,8 @@ func init() {
 	flag.StringVar(&cmdline.FieldsCfg, "cfg", os.Getenv("CONFIG_FILE"), "Config file with template values")
 	flag.StringVar(&cmdline.Token, "t", os.Getenv("TOKEN"), "slack `token`")
 	flag.StringVar(&cmdline.Cookie, "c", os.Getenv("COOKIE"), "slack `cookie`")
-	flag.StringVar(&cmdline.Host, "port", osenv.Value("PORT", defPort), "port to listen to")
-	flag.StringVar(&cmdline.Addr, "addr", os.Getenv("ADDR"), "listener `address`")
+	flag.StringVar(&cmdline.Host, "port", osenv.Value("PORT", defPort), "`port` to listen to")
+	flag.StringVar(&cmdline.Addr, "addr", os.Getenv("ADDR"), "host `address` for the listener, i.e. 127.0.0.1, if empty\nwill listen on all interfaces.")
 	flag.StringVar(&cmdline.RC.SiteKey, "site-key", os.Getenv("RECAPTCHA_KEY"), "recaptcha `key`")
 	flag.StringVar(&cmdline.RC.SecretKey, "site-secret", os.Getenv("RECAPTCHA_SECRET"), "recaptcha `secret`")
 }

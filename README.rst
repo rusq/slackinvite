@@ -29,26 +29,79 @@ Possible improvements:
   but is not used).
 - Heroku deployment, the magic purple button.
 
-Configuration Environment Variables
------------------------------------
+Configuration
+-------------
+
+Environment Variables
+~~~~~~~~~~~~~~~~~~~~~
 
 Configuration variables can be set in environment, or defined in an
 .env file.
 
 Supported environment variables:
-+-------------------+-------------------------------+
-|Variable           |Description                    |
-+-------------------+-------------------------------+
-|TOKEN              |Slack xoxc- token              |
-+-------------------+-------------------------------+
-|COOKIE             |Slack xoxd- cookie value.      |
-+-------------------+-------------------------------+
-|PORT               |port for http listener.        |
-+-------------------+-------------------------------+
-|RECAPTCHA_KEY      |Google ReCaptcha V3 key.       |
-+-------------------+-------------------------------+
-|RECAPTCHA_SECRET   |Google ReCaptcha V3 secret.    |
-+-------------------+-------------------------------+
+
++-------------------+-----------------------------------------+
+|**Variable**       |**Description**                          |
++-------------------+-----------------------------------------+
+|CONFIG_FILE        |configuration file with template values. |
++-------------------+-----------------------------------------+
+|TOKEN              |Slack xoxc- token.                       |
++-------------------+-----------------------------------------+
+|COOKIE             |Slack xoxd- cookie value.                |
++-------------------+-----------------------------------------+
+|ADDR               |address (or hostname) for http listener. |
++-------------------+-----------------------------------------+
+|PORT               |port for http listener.                  |
++-------------------+-----------------------------------------+
+|RECAPTCHA_KEY      |Google ReCaptcha V3 key (optional).      |
++-------------------+-----------------------------------------+
+|RECAPTCHA_SECRET   |Google ReCaptcha V3 secret (optional).   |
++-------------------+-----------------------------------------+
+
+
+Configuration file
+~~~~~~~~~~~~~~~~~~
+
+Configuration file is a yaml file and allows to define the template
+values, i.e. the website url, and slack community/workspace name, that
+will be shown to the user accessing the service.
+
+Configuration file supports environment variables.  To use an
+environment variable as a value, prefix text with a '$' sign,
+optionally enclosing the environment variable in curly braces, "{" and
+"}".  Well, you probably already know the drill (see slack_workspace
+variable in the Example).
+
+Sample configuration file:
+
+.. code:: yaml
+
+  slack_workspace: ${WORKSPACE_NAME}
+  submit_button: Gimme, gimme!
+  website: https://github.com/rusq
+  copyright: 2022 Maybe Peter
+  telegram_link: https://t.me/slackdump
+  github_link: https://github.com/rusq/slackdump
+
+Variables description:
+
++---------------+----------------------------------------+
+|**Parameter**  |**Description**                         |
++---------------+----------------------------------------+
+|slack_workspace|Slack workspace name                    |
++---------------+----------------------------------------+
+|submit_button  |Text shown on the submit button.        |
++---------------+----------------------------------------+
+|website        |URL of your website, shown in footer.   |
++---------------+----------------------------------------+
+|copyright      |Copyright message, shown in footer.     |
++---------------+----------------------------------------+
+|telegram_link  |Telegram channel/group URL. Shown in    |
+|               |footer.                                 |
++---------------+----------------------------------------+
+|github_link    |Github URL, i.e. to your project. Shown |
+|               |in footer.                              |
++---------------+----------------------------------------+
 
 
 
