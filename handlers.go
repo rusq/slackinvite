@@ -142,6 +142,7 @@ func (s *Server) hpostRoot(w http.ResponseWriter, r *http.Request) {
 		errRedirect(w, r, errCodeSlack)
 		return
 	}
+	dlog.Printf("successfully invited: %q", email)
 	ct, err := secure.EncryptWithPassphrase(email, s.secret[:])
 	if err != nil {
 		panic(err)
