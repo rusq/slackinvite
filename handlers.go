@@ -40,11 +40,11 @@ var errorText = map[errorCode]string{
 	errCodeServer:  "Server error occurred.",
 }
 
-func (ue errorCode) String() string {
-	if ue == "" {
+func (ec errorCode) String() string {
+	if ec == "" {
 		return ""
 	}
-	txt, ok := errorText[ue]
+	txt, ok := errorText[ec]
 	if !ok {
 		return "Unknown error"
 	}
