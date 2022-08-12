@@ -72,8 +72,12 @@ func (s *Server) Run() error {
 	middleware.RequestIDHeader = "X-Request-ID" // https://github.com/heroku/x/blob/v0.0.52/requestid/requestid.go#L11
 
 	r := chi.NewRouter()
-	r.Use(middleware.Logger)
+
 	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
 	r.Handle("/", http.HandlerFunc(s.handleRoot))
 	r.Handle("/thankyou", http.HandlerFunc(s.handleThankyou))
 
