@@ -74,6 +74,14 @@ func (rc ReCaptcha) JSv3(formID string) string {
 	return `<script src="https://www.google.com/recaptcha/api.js"></script>
 	<script>
 	function onSubmit(token) {
+		if (!form.checkValidity()) {
+		  event.preventDefault()
+		  event.stopPropagation()
+		  return
+		}
+  
+		form.classList.add('was-validated')
+
 	  document.getElementById("` + formID + `").submit();
 	}
   </script>`
