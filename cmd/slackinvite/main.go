@@ -8,9 +8,10 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/rusq/dlog"
 	"github.com/rusq/osenv/v2"
-	si "github.com/rusq/slackinviter"
-	"github.com/rusq/slackinviter/internal/recaptcha"
+	si "github.com/rusq/slackinvite"
 	"github.com/slack-go/slack"
+
+	"github.com/rusq/slackinvite/internal/recaptcha"
 )
 
 var _ = godotenv.Load()

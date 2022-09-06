@@ -1,4 +1,4 @@
-module github.com/rusq/slackinviter
+module github.com/rusq/slackinvite
 
 go 1.18
 

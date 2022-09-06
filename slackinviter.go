@@ -13,7 +13,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rusq/dlog"
 	"github.com/rusq/secure"
-	"github.com/rusq/slackinviter/internal/recaptcha"
+	"github.com/rusq/slackinvite/internal/recaptcha"
 	"github.com/slack-go/slack"
 )
 
