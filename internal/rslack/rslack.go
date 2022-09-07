@@ -11,8 +11,9 @@ import (
 )
 
 const (
-	domain  = "https://slack.com"
-	baseURL = domain + "/api/"
+	domain   = "https://slack.com"
+	baseURL  = domain + "/api/"
+	adminURL = "https://%s.slack.com/api/users.admin.%s?"
 )
 
 type TeamInfo struct {
@@ -50,11 +51,12 @@ func NewDcookie(value string) *http.Cookie {
 
 func (c *Client) AdminUsersInvite(teamID, email string) error {
 	values := url.Values{
-		"token":   {c.token},
-		"email":   {email},
-		"team_id": {teamID},
+		"token":      {c.token},
+		"email":      {email},
+		"team_id":    {teamID},
+		"set_active": {"true"},
 	}
-	resp, err := c.cl.PostForm(baseURL+"admin.users.invite", values)
+	resp, err := c.cl.PostForm(fmt.Sprintf(adminURL, teamID, "invite"), values)
 	if err != nil {
 		return fmt.Errorf("admin.users.invite error: %s", err)
 	}

@@ -21,4 +21,4 @@ require (
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 )
 
-replace github.com/slack-go/slack => github.com/rusq/slack v0.11.100
+// replace github.com/slack-go/slack => github.com/rusq/slack v0.11.100
