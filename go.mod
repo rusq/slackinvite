@@ -9,12 +9,11 @@ require (
 	github.com/rusq/dlog v1.3.3
 	github.com/rusq/osenv/v2 v2.0.1
 	github.com/rusq/secure v0.0.4
-	github.com/slack-go/slack v0.11.2
+	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
 )
 
 require (
 	github.com/fatih/color v1.10.0 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect

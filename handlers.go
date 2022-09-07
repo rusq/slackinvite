@@ -1,4 +1,4 @@
-package slackinviter
+package slackinvite
 
 import (
 	"html/template"
@@ -137,7 +137,7 @@ func (s *Server) hpostRoot(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if err := s.client.InviteToTeam(s.teamID, "Test", "Invite", email); err != nil {
+	if err := s.client.AdminUsersInvite(s.teamID, email); err != nil {
 		dlog.Printf("email: %s: %s", email, err)
 		errRedirect(w, r, errCodeSlack)
 		return
