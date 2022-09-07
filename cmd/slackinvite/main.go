@@ -53,20 +53,19 @@ func main() {
 		flag.Usage()
 		dlog.Fatal("config file not specified")
 	}
-
-	if cmdline.Port == "" {
-		cmdline.Port = defPort
-	}
-
-	client := rslack.New(cmdline.Token, []*http.Cookie{rslack.NewDcookie(cmdline.Cookie)})
-
 	fields, err := si.LoadFields(cmdline.FieldsCfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	if cmdline.Port == "" {
+		cmdline.Port = defPort
+	}
+
 	listenerAddr := cmdline.Addr + ":" + cmdline.Port
 	dlog.Printf("listening on %s", listenerAddr)
+
+	client := rslack.New(cmdline.Token, []*http.Cookie{rslack.NewDcookie(cmdline.Cookie)})
 	si, err := si.New(listenerAddr, nil, client, cmdline.RC, fields)
 	if err != nil {
 		dlog.Fatal(err)
