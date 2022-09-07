@@ -1,4 +1,4 @@
-package slackinviter
+package slackinvite
 
 import (
 	"crypto/rand"
@@ -14,7 +14,7 @@ import (
 	"github.com/rusq/dlog"
 	"github.com/rusq/secure"
 	"github.com/rusq/slackinvite/internal/recaptcha"
-	"github.com/slack-go/slack"
+	"github.com/rusq/slackinvite/internal/rslack"
 )
 
 const (
@@ -33,14 +33,19 @@ type Server struct {
 	teamID string         // slack team id
 	secret [secretSz]byte // secret is the key used to encrypt the CSRF token.
 
-	client *slack.Client // slack client that is called to issue the invite.
-	db     *sql.DB       // (UNUSED) database connection
+	client slackClient // slack client that is called to issue the invite.
+	db     *sql.DB     // (UNUSED) database connection
 	rc     recaptcha.ReCaptcha
 
 	fld Fields // template fields
 }
 
-func New(addr string, db *sql.DB, client *slack.Client, rc recaptcha.ReCaptcha, fields Fields) (*Server, error) {
+type slackClient interface {
+	GetTeamInfo() (rslack.TeamInfo, error)
+	AdminUsersInvite(teamName string, emailAddress string) error
+}
+
+func New(addr string, db *sql.DB, client slackClient, rc recaptcha.ReCaptcha, fields Fields) (*Server, error) {
 	var secret [secretSz]byte
 	if _, err := io.ReadFull(rand.Reader, secret[:]); err != nil {
 		return nil, err

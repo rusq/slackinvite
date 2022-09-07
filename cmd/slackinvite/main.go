@@ -3,15 +3,16 @@ package main
 import (
 	"flag"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/rusq/dlog"
 	"github.com/rusq/osenv/v2"
 	si "github.com/rusq/slackinvite"
-	"github.com/slack-go/slack"
 
 	"github.com/rusq/slackinvite/internal/recaptcha"
+	"github.com/rusq/slackinvite/internal/rslack"
 )
 
 var _ = godotenv.Load()
@@ -48,19 +49,23 @@ func main() {
 		flag.Usage()
 		dlog.Fatal("token or cookie not present")
 	}
-	if cmdline.Port == "" {
-		cmdline.Port = defPort
+	if cmdline.FieldsCfg == "" {
+		flag.Usage()
+		dlog.Fatal("config file not specified")
 	}
-
-	client := slack.New(cmdline.Token, slack.OptionCookie("d", cmdline.Cookie))
-
 	fields, err := si.LoadFields(cmdline.FieldsCfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	if cmdline.Port == "" {
+		cmdline.Port = defPort
+	}
+
 	listenerAddr := cmdline.Addr + ":" + cmdline.Port
 	dlog.Printf("listening on %s", listenerAddr)
+
+	client := rslack.New(cmdline.Token, []*http.Cookie{rslack.NewDcookie(cmdline.Cookie)})
 	si, err := si.New(listenerAddr, nil, client, cmdline.RC, fields)
 	if err != nil {
 		dlog.Fatal(err)

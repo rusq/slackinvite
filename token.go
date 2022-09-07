@@ -1,4 +1,4 @@
-package slackinviter
+package slackinvite
 
 import (
 	"fmt"
