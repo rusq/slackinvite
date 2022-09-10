@@ -3,61 +3,77 @@ package chtml
 
 import (
 	"fmt"
+	"io"
 	"io/fs"
 	"text/template"
 )
 
-// Layout is used to combine a layout and partials with a content template.
-//
-// Usage:
-// l := chtml.Layout{
-// 	LayoutPath: "layout.html",
-// 	PartialPattern: "partials/*.html",
-// 	FuncMap: template.FuncMap{
-// 		"foo": func() string {
-// 			return "bar"
-// 		},
-// 	},
-// }
-// tmpl, err := l.ReadFS(fsys, "content.html")
-// if err != nil {
-// 	log.Fatal(err) // shouldn't happen :huehuehue: :trollface:
-// }
-// err = tmpl.Execute(os.Stdout, nil)
-// if err != nil {
-// 	log.Fatal(err) // shouldn't happen :huehuehue: :trollface:
-// }
-type Layout struct {
-	// LayoutPath is the path to a html template file that defines regions
-	// that will be filled in by partial and page content templates.
-	LayoutPath string
-	// PartialPattern is a glob pattern that matches html partial templates.
-	PartialPattern string
-	// FuncMap is a map of functions that will be available to the templates.
-	FuncMap template.FuncMap
+func Execute(wr io.Writer, t *template.Template, data any) error {
+	return t.ExecuteTemplate(wr, "base", data)
 }
 
-// ReadFS, accepts a GlobFS and parses the layout, partial, and template at filename
+// Layout is used to combine a layout and partials with a content template.
+type Layout struct {
+	// layoutPath is the path to a html template file that defines regions
+	// that will be filled in by partial and page content templates.
+	//
+	// Layouts should define a region named "base" that contains all the html.
+	// This is so the root name of the template will be "base" and then we can
+	// use ExecuteTemplate to render the template.
+	layoutPath *string
+	// partialPattern is a glob pattern that matches html partial templates.
+	partialPattern *string
+	// funcMap is a map of functions that will be available to the templates.
+	funcMap template.FuncMap
+}
+
+func NewLayout() *Layout {
+	return &Layout{
+		funcMap: template.FuncMap{},
+	}
+}
+
+func (l *Layout) WithLayout(filepath string) *Layout {
+	l.layoutPath = &filepath
+	return l
+}
+
+func (l *Layout) WithPartialPattern(pattern string) *Layout {
+	l.partialPattern = &pattern
+	return l
+}
+
+func (l *Layout) WithFunc(name string, fn any) *Layout {
+	l.funcMap[name] = fn
+	return l
+}
+
+// ParseFS, accepts a FS and parses the layout, partial, and template at filename
 // into a template.Template.
 //
 // The name of the tempalte will be an empty string so it is best to use Execute
 // rather then ExecuteTemplate.
-func (l *Layout) ReadFS(fsys fs.GlobFS, filename string) (*template.Template, error) {
-	tmpl := template.New("").Funcs(l.FuncMap)
+func (l *Layout) ParseFS(fsys fs.FS, filename string) (*template.Template, error) {
+	tmpl := template.New("").Funcs(l.funcMap)
+	var err error
 
-	tmpl, err := tmpl.ParseFS(fsys, l.LayoutPath)
-	if err != nil {
-		return nil, fmt.Errorf("Layout.ReadFS failed to parse layout: %w", err)
+	if l.layoutPath != nil {
+		tmpl, err = tmpl.ParseFS(fsys, *l.layoutPath)
+		if err != nil {
+			return nil, fmt.Errorf("Layout.ParseFS failed to parse layout: %w", err)
+		}
 	}
 
-	tmpl, err = tmpl.ParseFS(fsys, l.PartialPattern)
-	if err != nil {
-		return nil, fmt.Errorf("Layout.ReadFS failed to parse partials: %w", err)
+	if l.partialPattern != nil {
+		tmpl, err = tmpl.ParseFS(fsys, *l.partialPattern)
+		if err != nil {
+			return nil, fmt.Errorf("Layout.ParseFS failed to parse partials: %w", err)
+		}
 	}
 
 	tmpl, err = tmpl.ParseFS(fsys, filename)
 	if err != nil {
-		return nil, fmt.Errorf("Layout.ReadFS failed to parse template: %w", err)
+		return nil, fmt.Errorf("Layout.ParseFS failed to parse template: %w", err)
 	}
 
 	return tmpl, nil
