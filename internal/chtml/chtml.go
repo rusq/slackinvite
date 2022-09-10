@@ -51,8 +51,8 @@ func (l *Layout) WithFunc(name string, fn any) *Layout {
 // ParseFS, accepts a FS and parses the layout, partial, and template at filename
 // into a template.Template.
 //
-// The name of the tempalte will be an empty string so it is best to use Execute
-// rather then ExecuteTemplate.
+// The name of the tempalte will be the top level {{define}} name in the template.
+// This should be "base" to keep things simple.
 func (l *Layout) ParseFS(fsys fs.FS, filename string) (*template.Template, error) {
 	tmpl := template.New("").Funcs(l.funcMap)
 	var err error
