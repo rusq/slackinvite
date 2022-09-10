@@ -13,6 +13,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rusq/dlog"
 	"github.com/rusq/secure"
+	"github.com/rusq/slackinvite/internal/chtml"
 	"github.com/rusq/slackinvite/internal/recaptcha"
 	"github.com/rusq/slackinvite/internal/rslack"
 )
@@ -22,10 +23,12 @@ const (
 	tokenTimeout = 20 * time.Minute // enough for time to think
 )
 
-//go:embed templates/*.html
-var fs embed.FS
-
-var tmpl = template.Must(template.ParseFS(fs, "templates/*.html"))
+var (
+	//go:embed templates/*.html
+	fs         embed.FS
+	indexTmpl  = template.Must(chtml.NewLayout().WithLayout("templates/layout.html").ParseFS(fs, "templates/index.html"))
+	thanksTmpl = template.Must(chtml.NewLayout().WithLayout("templates/layout.html").ParseFS(fs, "templates/thanks.html"))
+)
 
 // Server is the http server that issues the invites.
 type Server struct {

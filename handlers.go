@@ -7,6 +7,7 @@ import (
 
 	"github.com/rusq/dlog"
 	"github.com/rusq/secure"
+	"github.com/rusq/slackinvite/internal/chtml"
 )
 
 type page struct {
@@ -84,7 +85,7 @@ func (s *Server) hgetRoot(w http.ResponseWriter, r *http.Request) {
 		CaptchaHTML: template.HTML(s.rc.HTMLv3(s.fld.SubmitButton, "btn", "btn-primary")),
 		Fields:      s.fld,
 	}
-	if err := tmpl.ExecuteTemplate(w, "index.html", pg); err != nil {
+	if err := chtml.Execute(w, indexTmpl, pg); err != nil {
 		dlog.Print(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
@@ -167,7 +168,7 @@ func (s *Server) handleThankyou(w http.ResponseWriter, r *http.Request) {
 		Email:  email,
 		Fields: s.fld,
 	}
-	if err := tmpl.ExecuteTemplate(w, "thanks.html", pg); err != nil {
+	if err := chtml.Execute(w, thanksTmpl, pg); err != nil {
 		dlog.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return

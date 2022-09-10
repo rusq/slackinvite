@@ -3,9 +3,9 @@ package chtml
 
 import (
 	"fmt"
+	"html/template"
 	"io"
 	"io/fs"
-	"text/template"
 )
 
 func Execute(wr io.Writer, t *template.Template, data any) error {
