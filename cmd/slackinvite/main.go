@@ -65,7 +65,10 @@ func main() {
 	listenerAddr := cmdline.Addr + ":" + cmdline.Port
 	dlog.Printf("listening on %s", listenerAddr)
 
-	client := rslack.New(cmdline.Token, []*http.Cookie{rslack.NewDcookie(cmdline.Cookie)})
+	client, err := rslack.New(cmdline.Token, []*http.Cookie{rslack.NewDcookie(cmdline.Cookie)})
+	if err != nil {
+		dlog.Fatal(err)
+	}
 	si, err := si.New(listenerAddr, nil, client, cmdline.RC, fields)
 	if err != nil {
 		dlog.Fatal(err)

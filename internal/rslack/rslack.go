@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/rusq/slackinvite/internal/chttp"
+	"github.com/rusq/chttp"
 )
 
 const (
@@ -33,9 +33,12 @@ type Response struct {
 	Team  TeamInfo `json:"team,omitempty"`
 }
 
-func New(token string, cookies []*http.Cookie) *Client {
-	cl := chttp.New(domain, cookies, nil)
-	return &Client{token: token, cl: cl}
+func New(token string, cookies []*http.Cookie) (*Client, error) {
+	cl, err := chttp.New(domain, cookies, nil)
+	if err != nil {
+		return nil, err
+	}
+	return &Client{token: token, cl: cl}, nil
 }
 
 func NewDcookie(value string) *http.Cookie {
